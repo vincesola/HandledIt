@@ -4,7 +4,7 @@ import SwiftUI
 struct HandledItApp: App {
     @StateObject private var store = HandledItStore()
 
-    // TODO: Add the branded AppIcon asset in Assets.xcassets/AppIcon.appiconset from Xcode.
+    // TODO: Cross-check future refinements against Brand/, Splash/, and Docs/ before changing in-app branding.
     var body: some Scene {
         WindowGroup {
             LaunchRootView()
@@ -54,7 +54,7 @@ private struct SplashScreenView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 16) {
-                BrandMarkView()
+                BrandMarkView(size: 64)
 
                 VStack(spacing: 6) {
                     Text("HandledIt")

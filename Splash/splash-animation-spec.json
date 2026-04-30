@@ -1,0 +1,26 @@
+{
+  "durationSeconds": 1.2,
+  "steps": [
+    {
+      "time": 0.0,
+      "opacity": 0.0,
+      "scale": 0.92
+    },
+    {
+      "time": 0.45,
+      "opacity": 1.0,
+      "scale": 1.0
+    },
+    {
+      "time": 1.0,
+      "opacity": 1.0,
+      "scale": 1.0
+    },
+    {
+      "time": 1.2,
+      "opacity": 0.0,
+      "scale": 1.02
+    }
+  ],
+  "note": "Implement in SwiftUI. Do not add Lottie dependency yet."
+}
