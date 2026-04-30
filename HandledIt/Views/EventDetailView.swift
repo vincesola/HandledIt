@@ -35,11 +35,17 @@ struct EventDetailView: View {
 
                 ChildBadge(child: event.child)
 
-                Label(event.date.formatted(date: .complete, time: .omitted), systemImage: "calendar")
+                Label(
+                    event.date.formatted(date: .complete, time: .omitted),
+                    systemImage: "calendar"
+                )
                     .foregroundColor(.handledTextSecondary)
 
                 if let time = event.time {
-                    Label(time.formatted(date: .omitted, time: .shortened), systemImage: "clock")
+                    Label(
+                        time.formatted(date: .omitted, time: .shortened),
+                        systemImage: "clock"
+                    )
                         .foregroundColor(.handledTextSecondary)
                 }
 
@@ -88,7 +94,11 @@ struct EventDetailView: View {
 
                 ForEach(relatedActions) { action in
                     HStack(spacing: 12) {
-                        Image(systemName: action.isCompleted ? "checkmark.circle.fill" : "circle")
+                        Image(
+                            systemName: action.isCompleted
+                                ? "checkmark.circle.fill"
+                                : "circle"
+                        )
                             .foregroundColor(action.isCompleted ? .green : action.child.color)
                         Text(action.title)
                             .foregroundColor(.handledTextPrimary)

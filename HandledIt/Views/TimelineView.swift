@@ -24,7 +24,12 @@ struct TimelineView: View {
 
                             ForEach(group.events) { event in
                                 NavigationLink {
-                                    EventDetailView(event: event, relatedActions: store.relatedActionItems(for: event))
+                                    EventDetailView(
+                                        event: event,
+                                        relatedActions: store.relatedActionItems(
+                                            for: event
+                                        )
+                                    )
                                 } label: {
                                     TimelineCard(event: event)
                                 }

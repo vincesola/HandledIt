@@ -13,7 +13,10 @@ struct InboxView: View {
                 } else {
                     ForEach(store.sortedInboxItems) { item in
                         NavigationLink {
-                            ReviewItemView(item: item, seed: store.reviewSeed(for: item))
+                            ReviewItemView(
+                                item: item,
+                                seed: store.reviewSeed(for: item)
+                            )
                         } label: {
                             InboxCard(item: item)
                         }
@@ -106,7 +109,12 @@ private struct InboxCard: View {
 
                     Spacer()
 
-                    Text(item.dateAdded.formatted(date: .abbreviated, time: .shortened))
+                    Text(
+                        item.dateAdded.formatted(
+                            date: .abbreviated,
+                            time: .shortened
+                        )
+                    )
                         .font(.caption)
                         .foregroundColor(.handledTextSecondary)
                 }

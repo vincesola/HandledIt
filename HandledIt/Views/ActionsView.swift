@@ -87,7 +87,11 @@ private struct ActionCard: View {
         Button(action: toggleCompletion) {
             HandledCard {
                 HStack(spacing: 14) {
-                    Image(systemName: action.isCompleted ? "checkmark.circle.fill" : "circle")
+                    Image(
+                        systemName: action.isCompleted
+                            ? "checkmark.circle.fill"
+                            : "circle"
+                    )
                         .font(.title3)
                         .foregroundColor(action.isCompleted ? .green : action.child.color)
 
@@ -105,7 +109,12 @@ private struct ActionCard: View {
                             ChildBadge(child: action.child)
 
                             if let dueDate = action.dueDate {
-                                Text(dueDate.formatted(date: .abbreviated, time: .omitted))
+                                Text(
+                                    dueDate.formatted(
+                                        date: .abbreviated,
+                                        time: .omitted
+                                    )
+                                )
                                     .font(.caption)
                                     .foregroundColor(.handledTextSecondary)
                             }

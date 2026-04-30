@@ -28,7 +28,12 @@ struct ReviewItemView: View {
         _selectedChild = State(initialValue: seed.child)
         _notes = State(initialValue: seed.notes)
         _actionTitles = State(initialValue: seed.actionTitles)
-        _actionCompleted = State(initialValue: Array(repeating: false, count: seed.actionTitles.count))
+        _actionCompleted = State(
+            initialValue: Array(
+                repeating: false,
+                count: seed.actionTitles.count
+            )
+        )
     }
 
     var body: some View {
@@ -103,15 +108,34 @@ struct ReviewItemView: View {
                 Text("Event details")
                     .font(.headline)
 
-                labeledTextField(label: "Title", text: $title, placeholder: "Event title")
-                labeledDatePicker(label: "Date", selection: $eventDate, displayedComponents: .date)
-                Toggle("Include time", isOn: $includeTime)
+                labeledTextField(
+                    label: "Title",
+                    text: $title,
+                    placeholder: "Event title"
+                )
+                labeledDatePicker(
+                    label: "Date",
+                    selection: $eventDate,
+                    displayedComponents: .date
+                )
+                labeledToggle(
+                    label: "Include time",
+                    isOn: $includeTime
+                )
 
                 if includeTime {
-                    DatePicker("Time", selection: $eventTime, displayedComponents: .hourAndMinute)
+                    labeledDatePicker(
+                        label: "Time",
+                        selection: $eventTime,
+                        displayedComponents: .hourAndMinute
+                    )
                 }
 
-                labeledTextField(label: "Location", text: $location, placeholder: "Optional location")
+                labeledTextField(
+                    label: "Location",
+                    text: $location,
+                    placeholder: "Optional location"
+                )
             }
         }
     }
@@ -122,7 +146,11 @@ struct ReviewItemView: View {
                 Text("Applies to")
                     .font(.headline)
 
-                labeledPicker(label: "Child", selection: $selectedChild, items: store.childProfiles)
+                labeledPicker(
+                    label: "Child",
+                    selection: $selectedChild,
+                    items: store.childProfiles
+                )
             }
         }
     }
@@ -154,9 +182,17 @@ struct ReviewItemView: View {
                             Button(action: {
                                 actionCompleted[index].toggle()
                             }) {
-                                Image(systemName: actionCompleted[index] ? "checkmark.circle.fill" : "circle")
+                                Image(
+                                    systemName: actionCompleted[index]
+                                        ? "checkmark.circle.fill"
+                                        : "circle"
+                                )
                                     .font(.title3)
-                                    .foregroundColor(actionCompleted[index] ? .handledPrimary : .handledTextSecondary)
+                                    .foregroundColor(
+                                        actionCompleted[index]
+                                            ? .handledPrimary
+                                            : .handledTextSecondary
+                                    )
                             }
                             .buttonStyle(.plain)
 
@@ -231,9 +267,21 @@ struct ReviewItemView: View {
                 .font(.headline)
                 .foregroundColor(.handledTextSecondary)
 
-            DatePicker("", selection: selection, displayedComponents: displayedComponents)
+            DatePicker(
+                "",
+                selection: selection,
+                displayedComponents: displayedComponents
+            )
                 .labelsHidden()
         }
+    }
+
+    private func labeledToggle(
+        label: String,
+        isOn: Binding<Bool>
+    ) -> some View {
+        Toggle(label, isOn: isOn)
+            .foregroundColor(.handledTextPrimary)
     }
 
     private func labeledPicker(
@@ -277,7 +325,7 @@ struct ReviewItemView: View {
     }
 
     private func binding(for index: Int) -> Binding<String> {
-        Binding(
+        Binding<String>(
             get: { actionTitles[index] },
             set: { actionTitles[index] = $0 }
         )
