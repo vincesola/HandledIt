@@ -96,8 +96,8 @@ final class InboxViewModel: ObservableObject {
         child: ChildProfile,
         actionTitles: [String]
     ) {
-        store.saveReviewedItem(
-            sourceItem: sourceItem,
+        store.addReviewedEvent(
+            from: sourceItem,
             title: title,
             date: date,
             time: time,

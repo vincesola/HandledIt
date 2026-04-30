@@ -40,6 +40,6 @@ final class ActionsViewModel: ObservableObject {
     }
 
     func toggleCompletion(for action: ActionItem) {
-        store.toggleAction(id: action.id)
+        store.toggleActionCompletion(action)
     }
 }
