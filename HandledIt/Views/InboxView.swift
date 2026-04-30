@@ -31,23 +31,24 @@ struct InboxView: View {
     }
 
     private var headerSection: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            HStack(alignment: .top, spacing: 16) {
-                BrandMarkView(size: 60)
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(alignment: .top, spacing: 18) {
+                BrandMarkView(size: 68)
 
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 10) {
                     Text("Inbox")
-                        .font(.caption.weight(.semibold))
-                        .foregroundColor(.handledPrimary)
+                        .font(.caption2.weight(.medium))
+                        .foregroundColor(.handledTextSecondary)
+                        .opacity(0.82)
                         .textCase(.uppercase)
 
                     Text("HandledIt")
-                        .font(.system(size: 30, weight: .bold, design: .rounded))
+                        .font(.system(size: 32, weight: .bold, design: .rounded))
                         .foregroundColor(.handledTextPrimary)
 
                     Text("Life, handled.")
                         .font(.title3.weight(.semibold))
-                        .foregroundColor(.handledTextPrimary)
+                        .foregroundColor(.handledTextSecondary)
 
                     Text("Review what matters before it becomes an event or task.")
                         .font(.subheadline)
@@ -70,12 +71,12 @@ struct InboxView: View {
                 )
             }
         }
-        .padding(22)
+        .padding(24)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             LinearGradient(
                 colors: [
-                    Color.handledPrimary.opacity(0.08),
+                    Color.handledPrimary.opacity(0.09),
                     Color.handledCard
                 ],
                 startPoint: .topLeading,
@@ -87,7 +88,7 @@ struct InboxView: View {
                 .stroke(Color.handledBorder.opacity(0.9), lineWidth: 1)
         )
         .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .shadow(color: Color.black.opacity(0.035), radius: 14, x: 0, y: 8)
+        .shadow(color: Color.black.opacity(0.04), radius: 14, x: 0, y: 8)
     }
 
     private func headerMetric(title: String, value: String) -> some View {
@@ -188,15 +189,12 @@ private struct InboxCard: View {
                         Image(systemName: "arrow.right")
                             .font(.caption.weight(.bold))
                     }
-                    .foregroundColor(.handledPrimary)
+                    .foregroundColor(.white)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
-                    .background(Color.handledPrimary.opacity(0.1))
-                    .overlay(
-                        Capsule()
-                            .stroke(Color.handledPrimary.opacity(0.18), lineWidth: 1)
-                    )
+                    .background(Color.handledPrimary)
                     .clipShape(Capsule())
+                    .shadow(color: Color.handledPrimary.opacity(0.22), radius: 8, x: 0, y: 4)
                 }
             }
         }

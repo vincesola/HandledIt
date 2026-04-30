@@ -50,24 +50,27 @@ private struct SplashScreenView: View {
 
     var body: some View {
         ZStack {
-            Color(
-                red: 238 / 255,
-                green: 242 / 255,
-                blue: 247 / 255
+            LinearGradient(
+                colors: [
+                    Color(red: 36 / 255, green: 44 / 255, blue: 72 / 255),
+                    Color(red: 58 / 255, green: 70 / 255, blue: 110 / 255)
+                ],
+                startPoint: .top,
+                endPoint: .bottom
             )
                 .ignoresSafeArea()
 
-            VStack(spacing: 18) {
-                BrandMarkView(size: 72)
+            VStack(spacing: 20) {
+                BrandMarkView(size: 82, theme: .light)
 
                 VStack(spacing: 6) {
                     Text("HandledIt")
                         .font(.system(size: 34, weight: .semibold, design: .rounded))
-                        .foregroundColor(.handledTextPrimary)
+                        .foregroundColor(.white)
 
                     Text("Life, handled.")
                         .font(.headline)
-                        .foregroundColor(.handledTextSecondary)
+                        .foregroundColor(.white.opacity(0.72))
                 }
             }
             .scaleEffect(isVisible ? 1 : 0.95)
