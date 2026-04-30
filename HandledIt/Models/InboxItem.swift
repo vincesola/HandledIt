@@ -13,4 +13,20 @@ struct InboxItem: Identifiable, Hashable, Codable {
     let type: InboxItemType
     let dateAdded: Date
     let child: ChildProfile?
+
+    init(
+        id: UUID = UUID(),
+        title: String,
+        content: String,
+        type: InboxItemType,
+        dateAdded: Date = Date(),
+        child: ChildProfile? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.content = content
+        self.type = type
+        self.dateAdded = dateAdded
+        self.child = child
+    }
 }

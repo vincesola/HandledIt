@@ -6,4 +6,18 @@ struct ActionItem: Identifiable, Hashable, Codable {
     var isCompleted: Bool
     let child: ChildProfile
     let dueDate: Date?
+
+    init(
+        id: UUID = UUID(),
+        title: String,
+        isCompleted: Bool = false,
+        child: ChildProfile,
+        dueDate: Date? = nil
+    ) {
+        self.id = id
+        self.title = title
+        self.isCompleted = isCompleted
+        self.child = child
+        self.dueDate = dueDate
+    }
 }

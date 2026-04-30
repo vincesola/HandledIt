@@ -15,7 +15,7 @@ struct EventDetailView: View {
             }
             .padding(20)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.handledBackground)
         .navigationTitle(event.title)
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -24,57 +24,63 @@ struct EventDetailView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text(event.title)
                 .font(.title2.weight(.bold))
+                .foregroundColor(.handledTextPrimary)
 
             Text(event.child.name)
                 .font(.caption.weight(.bold))
                 .padding(.horizontal, 10)
                 .padding(.vertical, 6)
-                .background(event.child.color.color.opacity(0.16))
-                .foregroundStyle(event.child.color.color)
+                .background(event.child.color.opacity(0.16))
+                .foregroundColor(event.child.color)
                 .clipShape(Capsule())
 
             Label(event.date.formatted(date: .complete, time: .omitted), systemImage: "calendar")
+                .foregroundColor(.handledTextSecondary)
 
             if let time = event.time {
                 Label(time.formatted(date: .omitted, time: .shortened), systemImage: "clock")
+                    .foregroundColor(.handledTextSecondary)
             }
 
             if let location = event.location, !location.isEmpty {
                 Label(location, systemImage: "mappin.and.ellipse")
+                    .foregroundColor(.handledTextSecondary)
             }
 
             Divider()
 
             Text(event.notes)
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.handledTextSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 8)
+        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
     }
 
     private var relatedActionsCard: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Related actions")
                 .font(.headline)
+                .foregroundColor(.handledTextPrimary)
 
             ForEach(relatedActions) { action in
                 HStack(spacing: 12) {
                     Image(systemName: action.isCompleted ? "checkmark.circle.fill" : "circle")
-                        .foregroundStyle(action.isCompleted ? .green : .secondary)
+                        .foregroundColor(action.isCompleted ? .green : .handledTextSecondary)
                     Text(action.title)
-                        .foregroundStyle(.primary)
+                        .foregroundColor(.handledTextPrimary)
                     Spacer()
                 }
+                .padding(.vertical, 8)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 8)
+        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
     }
 }

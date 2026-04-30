@@ -1,36 +1,54 @@
 import SwiftUI
 
 struct ActionsView: View {
-    @ObservedObject var viewModel: ActionsViewModel
+    @EnvironmentObject private var store: HandledItStore
+    @State private var selectedChild: ChildProfile? = nil
+
+    private var actionSections: (incomplete: [ActionItem], completed: [ActionItem]) {
+        store.actionSections(filteredBy: selectedChild)
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                filterCard
+                filterSection
 
-                if viewModel.filteredActions.isEmpty {
+                if actionSections.incomplete.isEmpty && actionSections.completed.isEmpty {
                     emptyState
                 } else {
-                    ForEach(viewModel.filteredActions) { action in
-                        ActionCard(action: action) {
-                            viewModel.toggleCompletion(for: action)
+                    if !actionSections.incomplete.isEmpty {
+                        SectionHeader(title: "Open tasks")
+                        ForEach(actionSections.incomplete) { action in
+                            ActionCard(action: action) {
+                                store.toggleActionCompletion(action)
+                            }
+                        }
+                    }
+
+                    if !actionSections.completed.isEmpty {
+                        SectionHeader(title: "Completed")
+                        ForEach(actionSections.completed) { action in
+                            ActionCard(action: action) {
+                                store.toggleActionCompletion(action)
+                            }
                         }
                     }
                 }
             }
             .padding(20)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.handledBackground)
         .navigationTitle("Actions")
     }
 
-    private var filterCard: some View {
+    private var filterSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Child filter")
                 .font(.headline)
-            Picker("Child filter", selection: $viewModel.selectedChild) {
+                .foregroundColor(.handledTextPrimary)
+            Picker("Child filter", selection: $selectedChild) {
                 Text("All").tag(Optional<ChildProfile>.none)
-                ForEach(viewModel.childProfiles) { child in
+                ForEach(store.childProfiles) { child in
                     Text(child.name).tag(Optional(child))
                 }
             }
@@ -39,22 +57,34 @@ struct ActionsView: View {
         .padding(18)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 8)
+        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
     }
 
     private var emptyState: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("No actions for this filter")
                 .font(.headline)
+                .foregroundColor(.handledTextPrimary)
             Text("Reviewed events will create follow-up tasks here.")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.handledTextSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 8)
+        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
+    }
+}
+
+private struct SectionHeader: View {
+    let title: String
+
+    var body: some View {
+        Text(title)
+            .font(.headline)
+            .foregroundColor(.handledTextPrimary)
+            .padding(.vertical, 8)
     }
 }
 
@@ -67,27 +97,27 @@ private struct ActionCard: View {
             HStack(spacing: 14) {
                 Image(systemName: action.isCompleted ? "checkmark.circle.fill" : "circle")
                     .font(.title3)
-                    .foregroundStyle(action.isCompleted ? .green : action.child.color.color)
+                    .foregroundColor(action.isCompleted ? .green : action.child.color)
 
                 VStack(alignment: .leading, spacing: 6) {
                     Text(action.title)
                         .font(.headline)
-                        .foregroundStyle(.primary)
-                        .strikethrough(action.isCompleted, color: .secondary)
+                        .foregroundColor(.handledTextPrimary)
+                        .strikethrough(action.isCompleted, color: .handledTextSecondary)
 
                     HStack(spacing: 10) {
                         Text(action.child.name)
                             .font(.caption.weight(.bold))
                             .padding(.horizontal, 10)
                             .padding(.vertical, 6)
-                            .background(action.child.color.color.opacity(0.16))
-                            .foregroundStyle(action.child.color.color)
+                            .background(action.child.color.opacity(0.16))
+                            .foregroundColor(action.child.color)
                             .clipShape(Capsule())
 
                         if let dueDate = action.dueDate {
                             Text(dueDate.formatted(date: .abbreviated, time: .omitted))
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .foregroundColor(.handledTextSecondary)
                         }
                     }
                 }
@@ -98,7 +128,7 @@ private struct ActionCard: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(.white)
             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 8)
+            .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
         }
         .buttonStyle(.plain)
     }

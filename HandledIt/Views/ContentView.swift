@@ -1,18 +1,13 @@
 import SwiftUI
 
 struct ContentView: View {
-    @ObservedObject var inboxViewModel: InboxViewModel
-    @ObservedObject var timelineViewModel: TimelineViewModel
-    @ObservedObject var actionsViewModel: ActionsViewModel
-
+    @EnvironmentObject private var store: HandledItStore
     @State private var selectedTab = 0
 
     var body: some View {
         TabView(selection: $selectedTab) {
             NavigationStack {
-                InboxView(viewModel: inboxViewModel) {
-                    selectedTab = 1
-                }
+                InboxView()
             }
             .tabItem {
                 Label("Inbox", systemImage: "tray.full")
@@ -20,9 +15,7 @@ struct ContentView: View {
             .tag(0)
 
             NavigationStack {
-                TimelineView(viewModel: timelineViewModel) {
-                    selectedTab = 2
-                }
+                TimelineView()
             }
             .tabItem {
                 Label("Timeline", systemImage: "calendar")
@@ -30,13 +23,14 @@ struct ContentView: View {
             .tag(1)
 
             NavigationStack {
-                ActionsView(viewModel: actionsViewModel)
+                ActionsView()
             }
             .tabItem {
                 Label("Actions", systemImage: "checklist")
             }
             .tag(2)
         }
-        .tint(.indigo)
+        .tint(.handledPrimary)
+        .background(Color.handledBackground)
     }
 }

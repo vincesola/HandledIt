@@ -1,45 +1,53 @@
 import SwiftUI
 
 struct TimelineView: View {
-    @ObservedObject var viewModel: TimelineViewModel
-    let openActionsTab: () -> Void
+    @EnvironmentObject private var store: HandledItStore
+    @State private var selectedChild: ChildProfile? = nil
+
+    private var groupedEvents: [(date: Date, events: [ParsedEvent])] {
+        store.groupedEvents(filteredBy: selectedChild)
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                filterCard
+                filterSection
 
-                if viewModel.filteredEvents.isEmpty {
+                if groupedEvents.isEmpty {
                     emptyState
                 } else {
-                    ForEach(viewModel.filteredEvents) { event in
-                        NavigationLink {
-                            EventDetailView(event: event, relatedActions: viewModel.relatedActionItems(for: event))
-                        } label: {
-                            TimelineCard(event: event)
+                    ForEach(groupedEvents, id: \.date) { group in
+                        VStack(alignment: .leading, spacing: 14) {
+                            Text(group.date.formatted(date: .long, time: .omitted))
+                                .font(.headline)
+                                .foregroundColor(.handledTextPrimary)
+
+                            ForEach(group.events) { event in
+                                NavigationLink {
+                                    EventDetailView(event: event, relatedActions: store.relatedActionItems(for: event))
+                                } label: {
+                                    TimelineCard(event: event)
+                                }
+                                .buttonStyle(.plain)
+                            }
                         }
-                        .buttonStyle(.plain)
                     }
                 }
             }
             .padding(20)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.handledBackground)
         .navigationTitle("Timeline")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button("Actions", action: openActionsTab)
-            }
-        }
     }
 
-    private var filterCard: some View {
+    private var filterSection: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Child filter")
                 .font(.headline)
-            Picker("Child filter", selection: $viewModel.selectedChild) {
+                .foregroundColor(.handledTextPrimary)
+            Picker("Child filter", selection: $selectedChild) {
                 Text("All").tag(Optional<ChildProfile>.none)
-                ForEach(viewModel.childProfiles) { child in
+                ForEach(store.childProfiles) { child in
                     Text(child.name).tag(Optional(child))
                 }
             }
@@ -48,22 +56,23 @@ struct TimelineView: View {
         .padding(18)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 8)
+        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
     }
 
     private var emptyState: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("No events for this filter")
                 .font(.headline)
+                .foregroundColor(.handledTextPrimary)
             Text("Save a reviewed inbox item to populate the timeline.")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.handledTextSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 8)
+        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
     }
 }
 
@@ -76,17 +85,18 @@ private struct TimelineCard: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(event.title)
                         .font(.headline)
-                        .foregroundStyle(.primary)
-
-                    Text(event.date.formatted(date: .complete, time: .omitted))
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundColor(.handledTextPrimary)
 
                     if let time = event.time {
                         Text(time.formatted(date: .omitted, time: .shortened))
                             .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                            .foregroundColor(.handledTextSecondary)
                     }
+
+                    Text(event.location ?? "")
+                        .font(.subheadline)
+                        .foregroundColor(.handledTextSecondary)
+                        .lineLimit(1)
                 }
 
                 Spacer(minLength: 12)
@@ -95,26 +105,22 @@ private struct TimelineCard: View {
                     .font(.caption.weight(.bold))
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(event.child.color.color.opacity(0.16))
-                    .foregroundStyle(event.child.color.color)
+                    .background(event.child.color.opacity(0.16))
+                    .foregroundColor(event.child.color)
                     .clipShape(Capsule())
             }
 
-            if let location = event.location, !location.isEmpty {
-                Label(location, systemImage: "mappin.and.ellipse")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+            HStack {
+                Text(event.date.formatted(date: .abbreviated, time: .omitted))
+                    .font(.caption)
+                    .foregroundColor(.handledTextSecondary)
+                Spacer()
             }
-
-            Text(event.notes)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .lineLimit(2)
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 8)
+        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
     }
 }

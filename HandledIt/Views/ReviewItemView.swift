@@ -2,9 +2,9 @@ import SwiftUI
 
 struct ReviewItemView: View {
     let item: InboxItem
-    @ObservedObject var viewModel: InboxViewModel
-    let onSaveComplete: () -> Void
+    let seed: HandledItStore.ReviewSeed
 
+    @EnvironmentObject private var store: HandledItStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var title: String
@@ -15,13 +15,11 @@ struct ReviewItemView: View {
     @State private var selectedChild: ChildProfile
     @State private var notes: String
     @State private var actionTitles: [String]
+    @State private var actionCompleted: [Bool]
 
-    init(item: InboxItem, viewModel: InboxViewModel, onSaveComplete: @escaping () -> Void) {
+    init(item: InboxItem, seed: HandledItStore.ReviewSeed) {
         self.item = item
-        self.viewModel = viewModel
-        self.onSaveComplete = onSaveComplete
-
-        let seed = viewModel.reviewSeed(for: item)
+        self.seed = seed
         _title = State(initialValue: seed.title)
         _eventDate = State(initialValue: seed.date)
         _includeTime = State(initialValue: seed.time != nil)
@@ -30,6 +28,7 @@ struct ReviewItemView: View {
         _selectedChild = State(initialValue: seed.child)
         _notes = State(initialValue: seed.notes)
         _actionTitles = State(initialValue: seed.actionTitles)
+        _actionCompleted = State(initialValue: Array(repeating: false, count: seed.actionTitles.count))
     }
 
     var body: some View {
@@ -41,20 +40,37 @@ struct ReviewItemView: View {
             }
             .padding(20)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.handledBackground)
         .navigationTitle("Review")
         .navigationBarTitleDisplayMode(.inline)
-        .safeAreaInset(edge: .bottom) {
-            Button(action: save) {
-                Text("Save to Timeline")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button("Ignore") {
+                    ignore()
+                }
+                .foregroundColor(.red)
             }
-            .buttonStyle(.borderedProminent)
-            .padding(.horizontal, 20)
-            .padding(.top, 10)
-            .padding(.bottom, 14)
+        }
+        .safeAreaInset(edge: .bottom) {
+            VStack(spacing: 10) {
+                Button(action: save) {
+                    Text("Add to Timeline")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                }
+                .buttonStyle(.borderedProminent)
+
+                Button(action: {}) {
+                    Text("Add to Calendar (coming later)")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                }
+                .buttonStyle(.bordered)
+                .disabled(true)
+            }
+            .padding(20)
             .background(.thinMaterial)
         }
     }
@@ -65,15 +81,16 @@ struct ReviewItemView: View {
                 .font(.headline)
             Text(item.title)
                 .font(.title3.weight(.semibold))
+                .foregroundColor(.handledTextPrimary)
             Text(item.content)
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.handledTextSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 8)
+        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
     }
 
     private var detailsCard: some View {
@@ -81,64 +98,24 @@ struct ReviewItemView: View {
             Text("Suggested details")
                 .font(.headline)
 
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Title")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                TextField("Event title", text: $title)
-                    .textFieldStyle(.roundedBorder)
-            }
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Date")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                DatePicker("", selection: $eventDate, displayedComponents: .date)
-                    .labelsHidden()
-            }
-
-            Toggle("Include time", isOn: $includeTime)
-
-            if includeTime {
-                DatePicker("Time", selection: $eventTime, displayedComponents: .hourAndMinute)
-            }
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Location")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                TextField("Optional location", text: $location)
-                    .textFieldStyle(.roundedBorder)
-            }
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Child")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                Picker("Child", selection: $selectedChild) {
-                    ForEach(viewModel.childProfiles) { child in
-                        Text(child.name).tag(child)
-                    }
+            Group {
+                labeledTextField(label: "Title", text: $title, placeholder: "Event title")
+                labeledDatePicker(label: "Date", selection: $eventDate, displayedComponents: .date)
+                Toggle("Include time", isOn: $includeTime)
+                if includeTime {
+                    DatePicker("Time", selection: $eventTime, displayedComponents: .hourAndMinute)
+                        .labelsHidden()
                 }
-                .pickerStyle(.segmented)
-            }
-
-            VStack(alignment: .leading, spacing: 8) {
-                Text("Notes")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                TextEditor(text: $notes)
-                    .frame(minHeight: 110)
-                    .padding(8)
-                    .background(Color(.secondarySystemGroupedBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+                labeledTextField(label: "Location", text: $location, placeholder: "Optional location")
+                labeledPicker(label: "Child", selection: $selectedChild, items: store.childProfiles)
+                labeledTextEditor(label: "Notes", text: $notes)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(18)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 8)
+        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
     }
 
     private var actionsCard: some View {
@@ -149,27 +126,33 @@ struct ReviewItemView: View {
                 Spacer()
                 Button("Add") {
                     actionTitles.append("")
+                    actionCompleted.append(false)
                 }
             }
 
             if actionTitles.isEmpty {
                 Text("No actions suggested yet.")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundColor(.handledTextSecondary)
             } else {
                 ForEach(actionTitles.indices, id: \.self) { index in
                     HStack(spacing: 12) {
-                        Image(systemName: "circle")
-                            .foregroundStyle(.secondary)
+                        Button(action: { actionCompleted[index].toggle() }) {
+                            Image(systemName: actionCompleted[index] ? "checkmark.circle.fill" : "circle")
+                                .font(.title3)
+                                .foregroundColor(actionCompleted[index] ? .handledPrimary : .handledTextSecondary)
+                        }
+                        .buttonStyle(.plain)
 
                         TextField("Action item", text: binding(for: index))
                             .textFieldStyle(.roundedBorder)
 
                         Button {
                             actionTitles.remove(at: index)
+                            actionCompleted.remove(at: index)
                         } label: {
                             Image(systemName: "minus.circle.fill")
-                                .foregroundStyle(.secondary)
+                                .foregroundColor(.handledTextSecondary)
                         }
                         .buttonStyle(.plain)
                     }
@@ -180,7 +163,54 @@ struct ReviewItemView: View {
         .padding(18)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 8)
+        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
+    }
+
+    private func labeledTextField(label: String, text: Binding<String>, placeholder: String) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(label)
+                .font(.caption.weight(.semibold))
+                .foregroundColor(.handledTextSecondary)
+            TextField(placeholder, text: text)
+                .textFieldStyle(.roundedBorder)
+        }
+    }
+
+    private func labeledDatePicker(label: String, selection: Binding<Date>, displayedComponents: DatePicker.Components) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(label)
+                .font(.caption.weight(.semibold))
+                .foregroundColor(.handledTextSecondary)
+            DatePicker("", selection: selection, displayedComponents: displayedComponents)
+                .labelsHidden()
+        }
+    }
+
+    private func labeledPicker(label: String, selection: Binding<ChildProfile>, items: [ChildProfile]) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(label)
+                .font(.caption.weight(.semibold))
+                .foregroundColor(.handledTextSecondary)
+            Picker("Child", selection: selection) {
+                ForEach(items) { child in
+                    Text(child.name).tag(child)
+                }
+            }
+            .pickerStyle(.segmented)
+        }
+    }
+
+    private func labeledTextEditor(label: String, text: Binding<String>) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(label)
+                .font(.caption.weight(.semibold))
+                .foregroundColor(.handledTextSecondary)
+            TextEditor(text: text)
+                .frame(minHeight: 110)
+                .padding(8)
+                .background(Color.handledBackground)
+                .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
     }
 
     private func binding(for index: Int) -> Binding<String> {
@@ -191,8 +221,8 @@ struct ReviewItemView: View {
     }
 
     private func save() {
-        viewModel.saveReviewedItem(
-            sourceItem: item,
+        store.addReviewedEvent(
+            from: item,
             title: title,
             date: eventDate,
             time: includeTime ? eventTime : nil,
@@ -201,8 +231,11 @@ struct ReviewItemView: View {
             child: selectedChild,
             actionTitles: actionTitles
         )
+        dismiss()
+    }
 
-        onSaveComplete()
+    private func ignore() {
+        store.ignoreInboxItem(item)
         dismiss()
     }
 }

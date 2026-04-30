@@ -1,22 +1,21 @@
 import SwiftUI
 
 struct InboxView: View {
-    @ObservedObject var viewModel: InboxViewModel
-    let onReviewSaved: () -> Void
+    @EnvironmentObject private var store: HandledItStore
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
                 Text("Manual items waiting for review. Suggestions stay editable until you confirm them.")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundColor(.handledTextSecondary)
 
-                if viewModel.inboxItems.isEmpty {
+                if store.sortedInboxItems.isEmpty {
                     emptyState
                 } else {
-                    ForEach(viewModel.inboxItems) { item in
+                    ForEach(store.sortedInboxItems) { item in
                         NavigationLink {
-                            ReviewItemView(item: item, viewModel: viewModel, onSaveComplete: onReviewSaved)
+                            ReviewItemView(item: item, seed: store.reviewSeed(for: item))
                         } label: {
                             InboxCard(item: item)
                         }
@@ -26,7 +25,7 @@ struct InboxView: View {
             }
             .padding(20)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.handledBackground)
         .navigationTitle("Inbox")
     }
 
@@ -34,15 +33,16 @@ struct InboxView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Inbox cleared")
                 .font(.headline)
+                .foregroundColor(.handledTextPrimary)
             Text("New screenshots, emails, and notes will appear here in a future input phase.")
                 .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .foregroundColor(.handledTextSecondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 8)
+        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
     }
 }
 
@@ -55,10 +55,10 @@ private struct InboxCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(item.title)
                         .font(.headline)
-                        .foregroundStyle(.primary)
+                        .foregroundColor(.handledTextPrimary)
                     Text(item.content)
                         .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .foregroundColor(.handledTextSecondary)
                         .lineLimit(2)
                 }
 
@@ -66,21 +66,21 @@ private struct InboxCard: View {
 
                 Image(systemName: "chevron.right")
                     .font(.footnote.weight(.semibold))
-                    .foregroundStyle(.tertiary)
+                    .foregroundColor(.handledTextSecondary)
             }
 
             HStack(spacing: 10) {
                 Label(item.type.rawValue.capitalized, systemImage: iconName)
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .foregroundColor(.handledTextSecondary)
 
                 if let child = item.child {
                     Text(child.name)
                         .font(.caption.weight(.bold))
                         .padding(.horizontal, 10)
                         .padding(.vertical, 6)
-                        .background(child.color.color.opacity(0.16))
-                        .foregroundStyle(child.color.color)
+                        .background(child.color.opacity(0.16))
+                        .foregroundColor(child.color)
                         .clipShape(Capsule())
                 }
 
@@ -88,14 +88,14 @@ private struct InboxCard: View {
 
                 Text(item.dateAdded.formatted(date: .abbreviated, time: .shortened))
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundColor(.handledTextSecondary)
             }
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 8)
+        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
     }
 
     private var iconName: String {
