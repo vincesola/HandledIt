@@ -10,7 +10,7 @@ struct ActionsView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 20) {
                 filterSection
 
                 if actionSections.incomplete.isEmpty && actionSections.completed.isEmpty {
@@ -42,38 +42,29 @@ struct ActionsView: View {
     }
 
     private var filterSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Child filter")
-                .font(.headline)
-                .foregroundColor(.handledTextPrimary)
-            Picker("Child filter", selection: $selectedChild) {
-                Text("All").tag(Optional<ChildProfile>.none)
-                ForEach(store.childProfiles) { child in
-                    Text(child.name).tag(Optional(child))
+        HandledCard {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Child filter")
+                    .font(.headline)
+                    .foregroundColor(.handledTextPrimary)
+
+                Picker("Child filter", selection: $selectedChild) {
+                    Text("All").tag(Optional<ChildProfile>.none)
+                    ForEach(store.childProfiles) { child in
+                        Text(child.name).tag(Optional(child))
+                    }
                 }
+                .pickerStyle(.segmented)
             }
-            .pickerStyle(.segmented)
         }
-        .padding(18)
-        .background(.white)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
     }
 
     private var emptyState: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("No actions for this filter")
-                .font(.headline)
-                .foregroundColor(.handledTextPrimary)
-            Text("Reviewed events will create follow-up tasks here.")
-                .font(.subheadline)
-                .foregroundColor(.handledTextSecondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(20)
-        .background(.white)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
+        EmptyStateView(
+            title: "Nothing to handle right now.",
+            message: "When you save reviewed items, follow-up actions will appear here.",
+            systemImage: "checkmark.circle"
+        )
     }
 }
 
@@ -94,41 +85,37 @@ private struct ActionCard: View {
 
     var body: some View {
         Button(action: toggleCompletion) {
-            HStack(spacing: 14) {
-                Image(systemName: action.isCompleted ? "checkmark.circle.fill" : "circle")
-                    .font(.title3)
-                    .foregroundColor(action.isCompleted ? .green : action.child.color)
+            HandledCard {
+                HStack(spacing: 14) {
+                    Image(systemName: action.isCompleted ? "checkmark.circle.fill" : "circle")
+                        .font(.title3)
+                        .foregroundColor(action.isCompleted ? .green : action.child.color)
 
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(action.title)
-                        .font(.headline)
-                        .foregroundColor(.handledTextPrimary)
-                        .strikethrough(action.isCompleted, color: .handledTextSecondary)
+                    Circle()
+                        .fill(action.child.color)
+                        .frame(width: 10, height: 10)
 
-                    HStack(spacing: 10) {
-                        Text(action.child.name)
-                            .font(.caption.weight(.bold))
-                            .padding(.horizontal, 10)
-                            .padding(.vertical, 6)
-                            .background(action.child.color.opacity(0.16))
-                            .foregroundColor(action.child.color)
-                            .clipShape(Capsule())
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(action.title)
+                            .font(.headline)
+                            .foregroundColor(.handledTextPrimary)
+                            .strikethrough(action.isCompleted, color: .handledTextSecondary)
 
-                        if let dueDate = action.dueDate {
-                            Text(dueDate.formatted(date: .abbreviated, time: .omitted))
-                                .font(.caption)
-                                .foregroundColor(.handledTextSecondary)
+                        HStack(spacing: 10) {
+                            ChildBadge(child: action.child)
+
+                            if let dueDate = action.dueDate {
+                                Text(dueDate.formatted(date: .abbreviated, time: .omitted))
+                                    .font(.caption)
+                                    .foregroundColor(.handledTextSecondary)
+                            }
                         }
                     }
-                }
 
-                Spacer()
+                    Spacer()
+                }
+                .opacity(action.isCompleted ? 0.65 : 1)
             }
-            .padding(18)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(.white)
-            .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-            .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
         }
         .buttonStyle(.plain)
     }

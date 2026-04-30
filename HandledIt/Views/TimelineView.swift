@@ -10,7 +10,7 @@ struct TimelineView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
+            VStack(alignment: .leading, spacing: 20) {
                 filterSection
 
                 if groupedEvents.isEmpty {
@@ -41,38 +41,29 @@ struct TimelineView: View {
     }
 
     private var filterSection: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Child filter")
-                .font(.headline)
-                .foregroundColor(.handledTextPrimary)
-            Picker("Child filter", selection: $selectedChild) {
-                Text("All").tag(Optional<ChildProfile>.none)
-                ForEach(store.childProfiles) { child in
-                    Text(child.name).tag(Optional(child))
+        HandledCard {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Child filter")
+                    .font(.headline)
+                    .foregroundColor(.handledTextPrimary)
+
+                Picker("Child filter", selection: $selectedChild) {
+                    Text("All").tag(Optional<ChildProfile>.none)
+                    ForEach(store.childProfiles) { child in
+                        Text(child.name).tag(Optional(child))
+                    }
                 }
+                .pickerStyle(.segmented)
             }
-            .pickerStyle(.segmented)
         }
-        .padding(18)
-        .background(.white)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
     }
 
     private var emptyState: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("No events for this filter")
-                .font(.headline)
-                .foregroundColor(.handledTextPrimary)
-            Text("Save a reviewed inbox item to populate the timeline.")
-                .font(.subheadline)
-                .foregroundColor(.handledTextSecondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(20)
-        .background(.white)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
+        EmptyStateView(
+            title: "No events yet",
+            message: "Review inbox items to build your timeline.",
+            systemImage: "calendar.badge.exclamationmark"
+        )
     }
 }
 
@@ -80,47 +71,39 @@ private struct TimelineCard: View {
     let event: ParsedEvent
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(event.title)
-                        .font(.headline)
-                        .foregroundColor(.handledTextPrimary)
+        HandledCard {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .top, spacing: 12) {
+                    Circle()
+                        .fill(event.child.color)
+                        .frame(width: 10, height: 10)
+                        .padding(.top, 7)
 
-                    if let time = event.time {
-                        Text(time.formatted(date: .omitted, time: .shortened))
-                            .font(.subheadline)
-                            .foregroundColor(.handledTextSecondary)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(event.title)
+                            .font(.headline)
+                            .foregroundColor(.handledTextPrimary)
+
+                        HStack(spacing: 8) {
+                            ChildBadge(child: event.child)
+
+                            if let time = event.time {
+                                Text(time.formatted(date: .omitted, time: .shortened))
+                                    .font(.caption)
+                                    .foregroundColor(.handledTextSecondary)
+                            }
+                        }
+
+                        if let location = event.location, !location.isEmpty {
+                            Label(location, systemImage: "mappin.and.ellipse")
+                                .font(.subheadline)
+                                .foregroundColor(.handledTextSecondary)
+                        }
                     }
 
-                    Text(event.location ?? "")
-                        .font(.subheadline)
-                        .foregroundColor(.handledTextSecondary)
-                        .lineLimit(1)
+                    Spacer()
                 }
-
-                Spacer(minLength: 12)
-
-                Text(event.child.name)
-                    .font(.caption.weight(.bold))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(event.child.color.opacity(0.16))
-                    .foregroundColor(event.child.color)
-                    .clipShape(Capsule())
-            }
-
-            HStack {
-                Text(event.date.formatted(date: .abbreviated, time: .omitted))
-                    .font(.caption)
-                    .foregroundColor(.handledTextSecondary)
-                Spacer()
             }
         }
-        .padding(18)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.white)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
     }
 }

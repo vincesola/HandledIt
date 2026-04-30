@@ -5,10 +5,8 @@ struct InboxView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                Text("Manual items waiting for review. Suggestions stay editable until you confirm them.")
-                    .font(.subheadline)
-                    .foregroundColor(.handledTextSecondary)
+            VStack(alignment: .leading, spacing: 20) {
+                headerSection
 
                 if store.sortedInboxItems.isEmpty {
                     emptyState
@@ -26,23 +24,37 @@ struct InboxView: View {
             .padding(20)
         }
         .background(Color.handledBackground)
-        .navigationTitle("Inbox")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var headerSection: some View {
+        HandledCard {
+            HStack(alignment: .top, spacing: 16) {
+                BrandMarkView()
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("HandledIt")
+                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .foregroundColor(.handledTextPrimary)
+
+                    Text("Life, handled.")
+                        .font(.headline)
+                        .foregroundColor(.handledPrimary)
+
+                    Text("Review what matters before it becomes an event or task.")
+                        .font(.subheadline)
+                        .foregroundColor(.handledTextSecondary)
+                }
+            }
+        }
     }
 
     private var emptyState: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Inbox cleared")
-                .font(.headline)
-                .foregroundColor(.handledTextPrimary)
-            Text("New screenshots, emails, and notes will appear here in a future input phase.")
-                .font(.subheadline)
-                .foregroundColor(.handledTextSecondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(20)
-        .background(.white)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
+        EmptyStateView(
+            title: "Inbox cleared",
+            message: "New screenshots, emails, and notes will appear here in a future input phase.",
+            systemImage: "tray"
+        )
     }
 }
 
@@ -50,52 +62,64 @@ private struct InboxCard: View {
     let item: InboxItem
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .top) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(item.title)
-                        .font(.headline)
-                        .foregroundColor(.handledTextPrimary)
-                    Text(item.content)
-                        .font(.subheadline)
+        HandledCard {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(alignment: .top, spacing: 14) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 14, style: .continuous)
+                            .fill(Color.handledPrimary.opacity(0.1))
+                            .frame(width: 42, height: 42)
+
+                        Image(systemName: iconName)
+                            .font(.headline.weight(.semibold))
+                            .foregroundColor(.handledPrimary)
+                    }
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(item.title)
+                            .font(.headline)
+                            .foregroundColor(.handledTextPrimary)
+
+                        Text(item.content)
+                            .font(.subheadline)
+                            .foregroundColor(.handledTextSecondary)
+                            .lineLimit(2)
+                    }
+
+                    Spacer(minLength: 12)
+
+                    if let child = item.child {
+                        RoundedRectangle(cornerRadius: 999, style: .continuous)
+                            .fill(child.color)
+                            .frame(width: 6, height: 42)
+                    }
+                }
+
+                HStack(spacing: 10) {
+                    Text(item.type.rawValue.capitalized)
+                        .font(.caption.weight(.semibold))
                         .foregroundColor(.handledTextSecondary)
-                        .lineLimit(2)
+
+                    if let child = item.child {
+                        ChildBadge(child: child)
+                    }
+
+                    Spacer()
+
+                    Text(item.dateAdded.formatted(date: .abbreviated, time: .shortened))
+                        .font(.caption)
+                        .foregroundColor(.handledTextSecondary)
                 }
 
-                Spacer(minLength: 12)
+                HStack {
+                    Spacer()
 
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundColor(.handledTextSecondary)
-            }
-
-            HStack(spacing: 10) {
-                Label(item.type.rawValue.capitalized, systemImage: iconName)
-                    .font(.caption.weight(.semibold))
-                    .foregroundColor(.handledTextSecondary)
-
-                if let child = item.child {
-                    Text(child.name)
-                        .font(.caption.weight(.bold))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(child.color.opacity(0.16))
-                        .foregroundColor(child.color)
-                        .clipShape(Capsule())
+                    Label("Review", systemImage: "arrow.right.circle.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(.handledPrimary)
                 }
-
-                Spacer()
-
-                Text(item.dateAdded.formatted(date: .abbreviated, time: .shortened))
-                    .font(.caption)
-                    .foregroundColor(.handledTextSecondary)
             }
         }
-        .padding(18)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.white)
-        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
     }
 
     private var iconName: String {
