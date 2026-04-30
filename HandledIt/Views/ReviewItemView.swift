@@ -28,7 +28,9 @@ struct ReviewItemView: View {
         _selectedChild = State(initialValue: seed.child)
         _notes = State(initialValue: seed.notes)
         _actionTitles = State(initialValue: seed.actionTitles)
-        _actionCompleted = State(initialValue: Array(repeating: false, count: seed.actionTitles.count))
+        _actionCompleted = State(
+            initialValue: Array(repeating: false, count: seed.actionTitles.count)
+        )
     }
 
     var body: some View {
@@ -79,9 +81,11 @@ struct ReviewItemView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Source")
                 .font(.headline)
+
             Text(item.title)
                 .font(.title3.weight(.semibold))
                 .foregroundColor(.handledTextPrimary)
+
             Text(item.content)
                 .font(.subheadline)
                 .foregroundColor(.handledTextSecondary)
@@ -99,16 +103,45 @@ struct ReviewItemView: View {
                 .font(.headline)
 
             Group {
-                labeledTextField(label: "Title", text: $title, placeholder: "Event title")
-                labeledDatePicker(label: "Date", selection: $eventDate, displayedComponents: .date)
+                labeledTextField(
+                    label: "Title",
+                    text: $title,
+                    placeholder: "Event title"
+                )
+
+                labeledDatePicker(
+                    label: "Date",
+                    selection: $eventDate,
+                    displayedComponents: .date
+                )
+
                 Toggle("Include time", isOn: $includeTime)
+
                 if includeTime {
-                    DatePicker("Time", selection: $eventTime, displayedComponents: .hourAndMinute)
-                        .labelsHidden()
+                    DatePicker(
+                        "Time",
+                        selection: $eventTime,
+                        displayedComponents: .hourAndMinute
+                    )
+                    .labelsHidden()
                 }
-                labeledTextField(label: "Location", text: $location, placeholder: "Optional location")
-                labeledPicker(label: "Child", selection: $selectedChild, items: store.childProfiles)
-                labeledTextEditor(label: "Notes", text: $notes)
+
+                labeledTextField(
+                    label: "Location",
+                    text: $location,
+                    placeholder: "Optional location"
+                )
+
+                labeledPicker(
+                    label: "Child",
+                    selection: $selectedChild,
+                    items: store.childProfiles
+                )
+
+                labeledTextEditor(
+                    label: "Notes",
+                    text: $notes
+                )
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -123,7 +156,9 @@ struct ReviewItemView: View {
             HStack {
                 Text("Action items")
                     .font(.headline)
+
                 Spacer()
+
                 Button("Add") {
                     actionTitles.append("")
                     actionCompleted.append(false)
@@ -137,10 +172,22 @@ struct ReviewItemView: View {
             } else {
                 ForEach(actionTitles.indices, id: \.self) { index in
                     HStack(spacing: 12) {
-                        Button(action: { actionCompleted[index].toggle() }) {
-                            Image(systemName: actionCompleted[index] ? "checkmark.circle.fill" : "circle")
-                                .font(.title3)
-                                .foregroundColor(actionCompleted[index] ? .handledPrimary : .handledTextSecondary)
+                        Button(
+                            action: {
+                                actionCompleted[index].toggle()
+                            }
+                        ) {
+                            Image(
+                                systemName: actionCompleted[index]
+                                    ? "checkmark.circle.fill"
+                                    : "circle"
+                            )
+                            .font(.title3)
+                            .foregroundColor(
+                                actionCompleted[index]
+                                    ? .handledPrimary
+                                    : .handledTextSecondary
+                            )
                         }
                         .buttonStyle(.plain)
 
@@ -166,31 +213,50 @@ struct ReviewItemView: View {
         .shadow(color: Color.black.opacity(0.06), radius: 16, x: 0, y: 8)
     }
 
-    private func labeledTextField(label: String, text: Binding<String>, placeholder: String) -> some View {
+    private func labeledTextField(
+        label: String,
+        text: Binding<String>,
+        placeholder: String
+    ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(label)
                 .font(.caption.weight(.semibold))
                 .foregroundColor(.handledTextSecondary)
+
             TextField(placeholder, text: text)
                 .textFieldStyle(.roundedBorder)
         }
     }
 
-    private func labeledDatePicker(label: String, selection: Binding<Date>, displayedComponents: DatePicker.Components) -> some View {
+    private func labeledDatePicker(
+        label: String,
+        selection: Binding<Date>,
+        displayedComponents: DatePicker.Components
+    ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(label)
                 .font(.caption.weight(.semibold))
                 .foregroundColor(.handledTextSecondary)
-            DatePicker("", selection: selection, displayedComponents: displayedComponents)
-                .labelsHidden()
+
+            DatePicker(
+                "",
+                selection: selection,
+                displayedComponents: displayedComponents
+            )
+            .labelsHidden()
         }
     }
 
-    private func labeledPicker(label: String, selection: Binding<ChildProfile>, items: [ChildProfile]) -> some View {
+    private func labeledPicker(
+        label: String,
+        selection: Binding<ChildProfile>,
+        items: [ChildProfile]
+    ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(label)
                 .font(.caption.weight(.semibold))
                 .foregroundColor(.handledTextSecondary)
+
             Picker("Child", selection: selection) {
                 ForEach(items) { child in
                     Text(child.name).tag(child)
@@ -200,11 +266,15 @@ struct ReviewItemView: View {
         }
     }
 
-    private func labeledTextEditor(label: String, text: Binding<String>) -> some View {
+    private func labeledTextEditor(
+        label: String,
+        text: Binding<String>
+    ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(label)
                 .font(.caption.weight(.semibold))
                 .foregroundColor(.handledTextSecondary)
+
             TextEditor(text: text)
                 .frame(minHeight: 110)
                 .padding(8)
@@ -231,6 +301,7 @@ struct ReviewItemView: View {
             child: selectedChild,
             actionTitles: actionTitles
         )
+
         dismiss()
     }
 

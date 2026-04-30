@@ -43,21 +43,40 @@ final class HandledItStore: ObservableObject {
 
         switch item.title {
         case "Field Day screenshot":
-            let date = Calendar.current.date(from: DateComponents(year: year, month: 5, day: 10)) ?? Date()
-            let time = Calendar.current.date(bySettingHour: 9, minute: 0, second: 0, of: date)
+            let date = Calendar.current.date(
+                from: DateComponents(year: year, month: 5, day: 10)
+            ) ?? Date()
+            let time = Calendar.current.date(
+                bySettingHour: 9,
+                minute: 0,
+                second: 0,
+                of: date
+            )
+
             return ReviewSeed(
                 title: "Field Day",
                 date: date,
                 time: time,
                 location: "Lincoln Elementary",
                 child: item.child ?? .gigi,
-                notes: "Suggested from the screenshot. Double-check pickup logistics before saving.",
-                actionTitles: ["Bring water bottle", "Wear sunscreen"]
+                notes: "Suggested from the screenshot.\nDouble-check pickup logistics before saving.",
+                actionTitles: [
+                    "Bring water bottle",
+                    "Wear sunscreen"
+                ]
             )
 
         case "PTA email":
-            let date = Calendar.current.date(from: DateComponents(year: year, month: 5, day: 14)) ?? Date()
-            let time = Calendar.current.date(bySettingHour: 18, minute: 30, second: 0, of: date)
+            let date = Calendar.current.date(
+                from: DateComponents(year: year, month: 5, day: 14)
+            ) ?? Date()
+            let time = Calendar.current.date(
+                bySettingHour: 18,
+                minute: 30,
+                second: 0,
+                of: date
+            )
+
             return ReviewSeed(
                 title: "PTA Meeting",
                 date: date,
@@ -69,7 +88,10 @@ final class HandledItStore: ObservableObject {
             )
 
         case "Pizza day reminder":
-            let date = Calendar.current.date(from: DateComponents(year: year, month: 5, day: 17)) ?? Date()
+            let date = Calendar.current.date(
+                from: DateComponents(year: year, month: 5, day: 17)
+            ) ?? Date()
+
             return ReviewSeed(
                 title: "Pizza Day",
                 date: date,
@@ -103,7 +125,9 @@ final class HandledItStore: ObservableObject {
         child: ChildProfile,
         actionTitles: [String]
     ) {
-        let normalizedLocation = location?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedLocation = location?.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
         let normalizedActions = actionTitles
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
@@ -148,25 +172,37 @@ final class HandledItStore: ObservableObject {
     func relatedActionItems(for event: ParsedEvent) -> [ActionItem] {
         actionItems
             .filter {
-                $0.child == event.child &&
-                ($0.dueDate.map { Calendar.current.isDate($0, inSameDayAs: event.date) } ?? false)
+                $0.child == event.child
+                    && ($0.dueDate.map {
+                        Calendar.current.isDate($0, inSameDayAs: event.date)
+                    } ?? false)
             }
             .sorted {
                 ($0.dueDate ?? .distantFuture) < ($1.dueDate ?? .distantFuture)
             }
     }
 
-    func groupedEvents(filteredBy child: ChildProfile? = nil) -> [(date: Date, events: [ParsedEvent])] {
+    func groupedEvents(
+        filteredBy child: ChildProfile? = nil
+    ) -> [(date: Date, events: [ParsedEvent])] {
         let filtered = events
             .filter { child == nil || $0.child == child }
             .sorted { $0.date < $1.date }
 
-        let grouped = Dictionary(grouping: filtered) { Calendar.current.startOfDay(for: $0.date) }
+        let grouped = Dictionary(grouping: filtered) {
+            Calendar.current.startOfDay(for: $0.date)
+        }
 
         return grouped
             .keys
             .sorted()
-            .map { (date: $0, events: grouped[$0]!.sorted { $0.time ?? Date.distantFuture < $1.time ?? Date.distantFuture }) }
+            .map { date in
+                let groupedEvents = grouped[date, default: []].sorted {
+                    ($0.time ?? .distantFuture) < ($1.time ?? .distantFuture)
+                }
+
+                return (date: date, events: groupedEvents)
+            }
     }
 
     func filteredActions(filteredBy child: ChildProfile? = nil) -> [ActionItem] {
@@ -176,26 +212,48 @@ final class HandledItStore: ObservableObject {
                 if lhs.isCompleted != rhs.isCompleted {
                     return !lhs.isCompleted
                 }
-                return (lhs.dueDate ?? .distantFuture) < (rhs.dueDate ?? .distantFuture)
+
+                return (lhs.dueDate ?? .distantFuture)
+                    < (rhs.dueDate ?? .distantFuture)
             }
     }
 
-    func actionSections(filteredBy child: ChildProfile? = nil) -> (incomplete: [ActionItem], completed: [ActionItem]) {
+    func actionSections(
+        filteredBy child: ChildProfile? = nil
+    ) -> (incomplete: [ActionItem], completed: [ActionItem]) {
         let actions = filteredActions(filteredBy: child)
+
         return (
             incomplete: actions.filter { !$0.isCompleted },
             completed: actions.filter { $0.isCompleted }
         )
     }
 
-    private static func makeMockState(calendar: Calendar) -> (inboxItems: [InboxItem], events: [ParsedEvent], actionItems: [ActionItem]) {
+    private static func makeMockState(
+        calendar: Calendar
+    ) -> (
+        inboxItems: [InboxItem],
+        events: [ParsedEvent],
+        actionItems: [ActionItem]
+    ) {
         let currentYear = calendar.component(.year, from: Date())
         let now = Date()
 
-        let fieldDayDate = calendar.date(from: DateComponents(year: currentYear, month: 5, day: 10)) ?? now
-        let fieldDayTime = calendar.date(bySettingHour: 9, minute: 0, second: 0, of: fieldDayDate)
-        let ptaDate = calendar.date(from: DateComponents(year: currentYear, month: 5, day: 14)) ?? now
-        let pizzaDate = calendar.date(from: DateComponents(year: currentYear, month: 5, day: 17)) ?? now
+        let fieldDayDate = calendar.date(
+            from: DateComponents(year: currentYear, month: 5, day: 10)
+        ) ?? now
+        let fieldDayTime = calendar.date(
+            bySettingHour: 9,
+            minute: 0,
+            second: 0,
+            of: fieldDayDate
+        )
+        let ptaDate = calendar.date(
+            from: DateComponents(year: currentYear, month: 5, day: 14)
+        ) ?? now
+        let pizzaDate = calendar.date(
+            from: DateComponents(year: currentYear, month: 5, day: 17)
+        ) ?? now
 
         let fieldDayInbox = InboxItem(
             title: "Field Day screenshot",
@@ -227,15 +285,32 @@ final class HandledItStore: ObservableObject {
             time: fieldDayTime,
             location: "Lincoln Elementary",
             child: .gigi,
-            notes: "Suggested from a screenshot. Confirm supplies before leaving.",
+            notes: "Suggested from a screenshot.\nConfirm supplies before leaving.",
             sourceInboxItemId: fieldDayInbox.id
         )
 
         let actions = [
-            ActionItem(title: "Bring water bottle", child: .gigi, dueDate: fieldDayDate),
-            ActionItem(title: "Wear sunscreen", child: .gigi, dueDate: fieldDayDate),
-            ActionItem(title: "Reply to PTA volunteer form", child: .both, dueDate: ptaDate),
-            ActionItem(title: "Submit pizza order", isCompleted: true, child: .mila, dueDate: pizzaDate)
+            ActionItem(
+                title: "Bring water bottle",
+                child: .gigi,
+                dueDate: fieldDayDate
+            ),
+            ActionItem(
+                title: "Wear sunscreen",
+                child: .gigi,
+                dueDate: fieldDayDate
+            ),
+            ActionItem(
+                title: "Reply to PTA volunteer form",
+                child: .both,
+                dueDate: ptaDate
+            ),
+            ActionItem(
+                title: "Submit pizza order",
+                isCompleted: true,
+                child: .mila,
+                dueDate: pizzaDate
+            )
         ]
 
         return (
