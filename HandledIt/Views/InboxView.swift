@@ -31,25 +31,84 @@ struct InboxView: View {
     }
 
     private var headerSection: some View {
-        HandledCard {
+        VStack(alignment: .leading, spacing: 18) {
             HStack(alignment: .top, spacing: 16) {
-                BrandMarkView()
+                BrandMarkView(size: 60)
 
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Inbox")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(.handledPrimary)
+                        .textCase(.uppercase)
+
                     Text("HandledIt")
-                        .font(.system(size: 28, weight: .bold, design: .rounded))
+                        .font(.system(size: 30, weight: .bold, design: .rounded))
                         .foregroundColor(.handledTextPrimary)
 
                     Text("Life, handled.")
-                        .font(.headline)
-                        .foregroundColor(.handledPrimary)
+                        .font(.title3.weight(.semibold))
+                        .foregroundColor(.handledTextPrimary)
 
                     Text("Review what matters before it becomes an event or task.")
                         .font(.subheadline)
                         .foregroundColor(.handledTextSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
+
+                Spacer(minLength: 0)
+            }
+
+            HStack(spacing: 12) {
+                headerMetric(
+                    title: "Ready to review",
+                    value: "\(store.sortedInboxItems.count)"
+                )
+
+                headerMetric(
+                    title: "Status",
+                    value: store.sortedInboxItems.isEmpty ? "Clear" : "Active"
+                )
             }
         }
+        .padding(22)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            LinearGradient(
+                colors: [
+                    Color.handledPrimary.opacity(0.08),
+                    Color.handledCard
+                ],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .stroke(Color.handledBorder.opacity(0.9), lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+        .shadow(color: Color.black.opacity(0.035), radius: 14, x: 0, y: 8)
+    }
+
+    private func headerMetric(title: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.handledTextSecondary)
+
+            Text(value)
+                .font(.headline.weight(.semibold))
+                .foregroundColor(.handledTextPrimary)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.handledCard.opacity(0.85))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .stroke(Color.handledBorder.opacity(0.75), lineWidth: 1)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
     }
 
     private var emptyState: some View {
@@ -122,9 +181,22 @@ private struct InboxCard: View {
                 HStack {
                     Spacer()
 
-                    Label("Review", systemImage: "arrow.right.circle.fill")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundColor(.handledPrimary)
+                    HStack(spacing: 8) {
+                        Text("Review")
+                            .font(.subheadline.weight(.semibold))
+
+                        Image(systemName: "arrow.right")
+                            .font(.caption.weight(.bold))
+                    }
+                    .foregroundColor(.handledPrimary)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 10)
+                    .background(Color.handledPrimary.opacity(0.1))
+                    .overlay(
+                        Capsule()
+                            .stroke(Color.handledPrimary.opacity(0.18), lineWidth: 1)
+                    )
+                    .clipShape(Capsule())
                 }
             }
         }

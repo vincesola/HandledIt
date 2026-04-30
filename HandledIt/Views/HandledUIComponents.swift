@@ -2,6 +2,7 @@ import SwiftUI
 
 struct HandledCard<Content: View>: View {
     private let content: Content
+    private let cornerRadius: CGFloat = 28
 
     init(@ViewBuilder content: () -> Content) {
         self.content = content()
@@ -15,11 +16,11 @@ struct HandledCard<Content: View>: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.handledCard)
         .overlay(
-            RoundedRectangle(cornerRadius: 24, style: .continuous)
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                 .stroke(Color.handledBorder.opacity(0.7), lineWidth: 1)
         )
-        .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-        .shadow(color: Color.black.opacity(0.03), radius: 12, x: 0, y: 6)
+        .clipShape(RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
     }
 }
 
@@ -27,18 +28,22 @@ struct ChildBadge: View {
     let child: ChildProfile
 
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 9) {
             Circle()
-                .fill(child.color)
-                .frame(width: 8, height: 8)
+                .fill(child.color.opacity(0.9))
+                .frame(width: 7, height: 7)
 
             Text(child.name)
                 .font(.caption.weight(.semibold))
-                .foregroundColor(child.color)
+                .foregroundColor(child.color.opacity(0.95))
         }
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(child.color.opacity(0.12))
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(child.color.opacity(0.1))
+        .overlay(
+            Capsule()
+                .stroke(child.color.opacity(0.12), lineWidth: 1)
+        )
         .clipShape(Capsule())
     }
 }

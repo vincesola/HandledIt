@@ -32,7 +32,7 @@ private struct LaunchRootView: View {
                 return
             }
 
-            withAnimation(.easeOut(duration: 0.35)) {
+            withAnimation(.easeOut(duration: 0.8)) {
                 splashIsVisible = true
             }
 
@@ -50,23 +50,27 @@ private struct SplashScreenView: View {
 
     var body: some View {
         ZStack {
-            Color.handledBackground
+            Color(
+                red: 238 / 255,
+                green: 242 / 255,
+                blue: 247 / 255
+            )
                 .ignoresSafeArea()
 
-            VStack(spacing: 16) {
-                BrandMarkView(size: 64)
+            VStack(spacing: 18) {
+                BrandMarkView(size: 72)
 
                 VStack(spacing: 6) {
                     Text("HandledIt")
-                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                        .font(.system(size: 34, weight: .semibold, design: .rounded))
                         .foregroundColor(.handledTextPrimary)
 
                     Text("Life, handled.")
                         .font(.headline)
-                        .foregroundColor(.handledPrimary)
+                        .foregroundColor(.handledTextSecondary)
                 }
             }
-            .scaleEffect(isVisible ? 1 : 0.96)
+            .scaleEffect(isVisible ? 1 : 0.95)
             .opacity(isVisible ? 1 : 0)
         }
     }
